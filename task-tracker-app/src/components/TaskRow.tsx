@@ -1,0 +1,90 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import DatePicker from 'react-datepicker';
+import { Task } from '@/types';
+import { FaTrash, FaCheck } from 'react-icons/fa';
+import { debounce } from 'lodash';
+
+interface TaskRowProps {
+  task: Task;
+  onSave: (task: Task) => void;
+  onDelete: (taskId: string) => void;
+  onEditNotes: (task: Task) => void;
+  onToggleComplete: (taskId: string) => void;
+}
+
+const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, onToggleComplete }) => {
+  const [editableTask, setEditableTask] = useState<Task>(task);
+
+  const debouncedSave = useCallback(debounce((newTask: Task) => {
+    onSave(newTask);
+  }, 500), [onSave]);
+
+  useEffect(() => {
+    setEditableTask(task);
+  }, [task]);
+
+  useEffect(() => {
+    if (editableTask !== task) {
+      debouncedSave(editableTask);
+    }
+    return () => {
+      debouncedSave.cancel();
+    };
+  }, [editableTask, debouncedSave, task]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setEditableTask(prevTask => ({ ...prevTask, [name]: value }));
+  };
+
+  const handleDateChange = (date: Date | null) => {
+    if (date) {
+      setEditableTask(prevTask => ({ ...prevTask, dropDead: date.toISOString() }));
+    }
+  };
+
+  const truncateNotes = (notes: string) => {
+    if (notes.length > 20) {
+      return notes.substring(0, 20) + '...';
+    }
+    return notes;
+  };
+
+  return (
+    <tr className={`border-b border-gray-800 ${task.completed ? 'bg-gray-800 opacity-50' : 'hover:bg-gray-700'}`}>
+        <>
+          <td className="p-1"><input name="text" value={editableTask.text} onChange={handleChange} className="bg-gray-700 p-1 rounded w-full" /></td>
+          <td className="p-1">
+            <select name="priority" value={editableTask.priority} onChange={handleChange} className="bg-gray-700 p-1 rounded w-full">
+              <option value="Hopper">Hopper</option>
+              <option value="Urgent">Urgent</option>
+              <option value="Top 5">Top 5</option>
+            </select>
+          </td>
+          <td className="p-1">
+            <DatePicker selected={editableTask.dropDead ? new Date(editableTask.dropDead) : null} onChange={handleDateChange} className="bg-gray-700 p-1 rounded w-full" />
+          </td>
+          <td className="p-1">
+            <select name="category" value={editableTask.category} onChange={handleChange} className="bg-gray-700 p-1 rounded w-full">
+              <option value="Content">Content</option>
+              <option value="Ops">Ops</option>
+              <option value="Strategy">Strategy</option>
+              <option value="Paid">Paid</option>
+              <option value="Other">Other</option>
+            </select>
+          </td>
+          <td onClick={() => onEditNotes(task)} className="p-1 cursor-pointer hover:bg-gray-600">
+            {truncateNotes(editableTask.notes)}
+          </td>
+          <td className="p-1">
+            <div className="flex items-center justify-center space-x-2">
+              <button onClick={() => onToggleComplete(task.id)} className="text-green-500 hover:text-green-400"><FaCheck /></button>
+              <button onClick={() => onDelete(task.id)} className="text-red-500 hover:text-red-400"><FaTrash /></button>
+            </div>
+          </td>
+        </>
+    </tr>
+  );
+};
+
+export default TaskRow;
