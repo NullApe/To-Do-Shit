@@ -6,7 +6,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   try {
     const { id } = await params;
     const { task } = await req.json();
-    await kv.hset('tasks', { [id]: task });
+    const workspace = task.workspace || 'Work';
+    await kv.hset(`tasks:${workspace}`, { [id]: task });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error(error);
@@ -17,7 +18,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    await kv.hdel('tasks', id);
+    const { searchParams } = new URL(req.url);
+    const workspace = searchParams.get('workspace') || 'Work';
+    await kv.hdel(`tasks:${workspace}`, id);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error(error);

@@ -21,7 +21,9 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onSaveTask, onDeleteTask, on
   const renderTaskSection = (title: string, tasks: Task[]) => (
     <div>
       <h2 className="text-2xl font-bold text-white mb-4 border-b-2 border-gray-700 pb-2">{title}</h2>
-      <table className="w-full text-left text-white table-fixed">
+
+      {/* Desktop Table View */}
+      <table className="hidden md:table w-full text-left text-white table-fixed">
         <thead>
           <tr className="border-b border-gray-700">
             <th className="p-2 w-1/3">Task</th>
@@ -34,17 +36,31 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onSaveTask, onDeleteTask, on
         </thead>
         <tbody>
           {tasks.map(task => (
-            <TaskRow 
-              key={task.id} 
-              task={task} 
-              onSave={onSaveTask} 
-              onDelete={onDeleteTask} 
-              onEditNotes={onEditNotes} 
-              onToggleComplete={onToggleComplete} 
+            <TaskRow
+              key={task.id}
+              task={task}
+              onSave={onSaveTask}
+              onDelete={onDeleteTask}
+              onEditNotes={onEditNotes}
+              onToggleComplete={onToggleComplete}
             />
           ))}
         </tbody>
       </table>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-2">
+        {tasks.map(task => (
+          <TaskRow
+            key={task.id}
+            task={task}
+            onSave={onSaveTask}
+            onDelete={onDeleteTask}
+            onEditNotes={onEditNotes}
+            onToggleComplete={onToggleComplete}
+          />
+        ))}
+      </div>
     </div>
   );
 

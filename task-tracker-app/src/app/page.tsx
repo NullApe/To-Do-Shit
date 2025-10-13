@@ -11,6 +11,7 @@ import NotesModal from '@/components/NotesModal';
 
 export default function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [selectedWorkspace, setSelectedWorkspace] = useState<'Work' | 'Projects' | 'Personal'>('Work');
   const [selectedCategory, setSelectedCategory] = useState<'All' | Task['category']>('All');
   const [showTop5LimitModal, setShowTop5LimitModal] = useState(false);
   const [pendingTask, setPendingTask] = useState<Omit<Task, 'id' | 'notes'> | null>(null);
@@ -18,29 +19,29 @@ export default function Home() {
 
   useEffect(() => {
     const fetchTasks = async () => {
-      const res = await fetch('/api/tasks');
+      const res = await fetch(`/api/tasks?workspace=${selectedWorkspace}`);
       const data = await res.json();
       setTasks(Object.values(data));
     };
     fetchTasks();
-  }, []);
+  }, [selectedWorkspace]);
 
   const categories: Task['category'][] = ['Content', 'Ops', 'Strategy', 'Paid', 'Other'];
 
 
-  const handleAddTask = async (taskData: Omit<Task, 'id' | 'notes'>) => {
+  const handleAddTask = async (taskData: Omit<Task, 'id' | 'notes' | 'workspace'>) => {
     const top5Tasks = tasks.filter(t => t.priority === 'Top 5');
     if (taskData.priority === 'Top 5' && top5Tasks.length >= 5) {
-      setPendingTask(taskData);
+      setPendingTask({ ...taskData, workspace: selectedWorkspace });
       setShowTop5LimitModal(true);
     } else {
       const res = await fetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ task: { ...taskData, notes: '', completed: false } }),
+        body: JSON.stringify({ task: { ...taskData, workspace: selectedWorkspace, notes: '', completed: false } }),
       });
       const { id } = await res.json();
-      setTasks([...tasks, { ...taskData, id, notes: '', completed: false }]);
+      setTasks([...tasks, { ...taskData, workspace: selectedWorkspace, id, notes: '', completed: false }]);
     }
   };
 
@@ -99,7 +100,7 @@ export default function Home() {
   };
 
   const handleDeleteTask = async (taskId: string) => {
-    await fetch(`/api/tasks/${taskId}`, {
+    await fetch(`/api/tasks/${taskId}?workspace=${selectedWorkspace}`, {
       method: 'DELETE',
     });
     setTasks(tasks.filter(task => task.id !== taskId));
@@ -135,6 +136,24 @@ export default function Home() {
     <main className="bg-gray-900 text-white min-h-screen p-4 sm:p-8">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-4xl font-bold mb-6 text-center">Task Tracker</h1>
+
+        {/* Workspace Tabs */}
+        <div className="flex justify-center mb-6 gap-2">
+          {(['Work', 'Projects', 'Personal'] as const).map((workspace) => (
+            <button
+              key={workspace}
+              onClick={() => setSelectedWorkspace(workspace)}
+              className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+                selectedWorkspace === workspace
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              {workspace}
+            </button>
+          ))}
+        </div>
+
         <FilterControls 
           categories={categories} 
           selectedCategory={selectedCategory} 

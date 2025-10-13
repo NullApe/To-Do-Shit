@@ -7,4 +7,5 @@ export interface Task {
   category: 'Content' | 'Ops' | 'Strategy' | 'Paid' | 'Other';
   notes: string;
   completed: boolean;
+  workspace: 'Work' | 'Projects' | 'Personal';
 }
