@@ -18,9 +18,13 @@ export default function Home() {
   const [editingNotesTask, setEditingNotesTask] = useState<Task | null>(null);
 
   const fetchTasks = useCallback(async () => {
+    console.log('Fetching tasks for workspace:', selectedWorkspace);
     const res = await fetch(`/api/tasks?workspace=${selectedWorkspace}`);
     const data = await res.json();
-    setTasks(data && typeof data === 'object' ? Object.values(data) : []);
+    console.log('Fetched data:', data);
+    const tasksArray = data && typeof data === 'object' ? Object.values(data) : [];
+    console.log('Tasks array:', tasksArray);
+    setTasks(tasksArray);
   }, [selectedWorkspace]);
 
   useEffect(() => {
@@ -31,16 +35,21 @@ export default function Home() {
 
 
   const handleAddTask = async (taskData: Omit<Task, 'id' | 'notes' | 'workspace'>) => {
+    console.log('Adding task:', taskData);
     const top5Tasks = tasks.filter(t => t.priority === 'Top 5');
     if (taskData.priority === 'Top 5' && top5Tasks.length >= 5) {
       setPendingTask({ ...taskData, workspace: selectedWorkspace });
       setShowTop5LimitModal(true);
     } else {
-      await fetch('/api/tasks', {
+      const taskToSave = { ...taskData, workspace: selectedWorkspace, notes: '', completed: false };
+      console.log('Sending task to API:', taskToSave);
+      const response = await fetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ task: { ...taskData, workspace: selectedWorkspace, notes: '', completed: false } }),
+        body: JSON.stringify({ task: taskToSave }),
       });
+      const result = await response.json();
+      console.log('API response:', result);
       await fetchTasks();
     }
   };
