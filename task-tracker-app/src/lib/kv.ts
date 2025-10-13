@@ -7,7 +7,18 @@ export const kv = {
   async hgetall(key: string) {
     const data = await redis.hgetall(key);
     // Convert empty object to null to match expected behavior
-    return Object.keys(data).length === 0 ? null : data;
+    if (Object.keys(data).length === 0) return null;
+
+    // Parse JSON strings back to objects
+    const parsed: Record<string, unknown> = {};
+    for (const [field, value] of Object.entries(data)) {
+      try {
+        parsed[field] = JSON.parse(value);
+      } catch {
+        parsed[field] = value;
+      }
+    }
+    return parsed;
   },
 
   async hset(key: string, values: Record<string, unknown>) {
