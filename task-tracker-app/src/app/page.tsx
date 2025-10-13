@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Task } from '@/types';
 import TaskForm from '@/components/TaskForm';
 import TaskList from '@/components/TaskList';
@@ -13,59 +14,109 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<'All' | Task['category']>('All');
   const [showTop5LimitModal, setShowTop5LimitModal] = useState(false);
   const [pendingTask, setPendingTask] = useState<Omit<Task, 'id' | 'notes'> | null>(null);
-  const [idCounter, setIdCounter] = useState(0);
   const [editingNotesTask, setEditingNotesTask] = useState<Task | null>(null);
+
+  useEffect(() => {
+    const fetchTasks = async () => {
+      const res = await fetch('/api/tasks');
+      const data = await res.json();
+      setTasks(Object.values(data));
+    };
+    fetchTasks();
+  }, []);
 
   const categories: Task['category'][] = ['Content', 'Ops', 'Strategy', 'Paid', 'Other'];
 
-  const handleAddTask = (taskData: Omit<Task, 'id' | 'notes'>) => {
+
+  const handleAddTask = async (taskData: Omit<Task, 'id' | 'notes'>) => {
     const top5Tasks = tasks.filter(t => t.priority === 'Top 5');
     if (taskData.priority === 'Top 5' && top5Tasks.length >= 5) {
       setPendingTask(taskData);
       setShowTop5LimitModal(true);
     } else {
-      const newTask: Task = { ...taskData, id: idCounter.toString(), notes: '', completed: false };
-      setIdCounter(idCounter + 1);
-      setTasks([...tasks, newTask]);
+      const res = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ task: { ...taskData, notes: '', completed: false } }),
+      });
+      const { id } = await res.json();
+      setTasks([...tasks, { ...taskData, id, notes: '', completed: false }]);
     }
   };
 
-  const handleMoveToUrgent = () => {
+  const handleMoveToUrgent = async () => {
     if (pendingTask) {
-      const newTask: Task = { ...pendingTask, priority: 'Urgent', id: idCounter.toString(), notes: '', completed: false };
-      setIdCounter(idCounter + 1);
-      setTasks([...tasks, newTask]);
+      const res = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ task: { ...pendingTask, priority: 'Urgent', notes: '', completed: false } }),
+      });
+      const { id } = await res.json();
+      setTasks([...tasks, { ...pendingTask, priority: 'Urgent', id, notes: '', completed: false }]);
       setShowTop5LimitModal(false);
       setPendingTask(null);
     }
   };
 
-  const handleReplaceTask = (taskIdToReplace: string) => {
+  const handleReplaceTask = async (taskIdToReplace: string) => {
     if (pendingTask) {
-      const newTask: Task = { ...pendingTask, id: idCounter.toString(), notes: '', completed: false };
-      setIdCounter(idCounter + 1);
-      const updatedTasks = tasks.map(t => 
+      const taskToUpdate = tasks.find(t => t.id === taskIdToReplace);
+      if (taskToUpdate) {
+        await fetch(`/api/tasks/${taskIdToReplace}`,
+          {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ task: { ...taskToUpdate, priority: 'Urgent' } }),
+          }
+        );
+      }
+
+      const res = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ task: { ...pendingTask, notes: '', completed: false } }),
+      });
+      const { id } = await res.json();
+
+      const updatedTasks = tasks.map(t =>
         t.id === taskIdToReplace ? { ...t, priority: 'Urgent' } : t
       );
-      setTasks([...updatedTasks, newTask]);
+      setTasks([...updatedTasks, { ...pendingTask, id, notes: '', completed: false }]);
       setShowTop5LimitModal(false);
       setPendingTask(null);
     }
   };
 
-  const handleSaveTask = (updatedTask: Task) => {
+  const handleSaveTask = async (updatedTask: Task) => {
+    await fetch(`/api/tasks/${updatedTask.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ task: updatedTask }),
+    });
     setTasks(tasks.map(task => (task.id === updatedTask.id ? updatedTask : task)));
     setEditingNotesTask(null);
   };
 
-  const handleDeleteTask = (taskId: string) => {
+  const handleDeleteTask = async (taskId: string) => {
+    await fetch(`/api/tasks/${taskId}`, {
+      method: 'DELETE',
+    });
     setTasks(tasks.filter(task => task.id !== taskId));
   };
 
-  const handleToggleComplete = (taskId: string) => {
-    setTasks(tasks.map(task => 
-      task.id === taskId ? { ...task, completed: !task.completed } : task
-    ));
+  const handleToggleComplete = async (taskId: string) => {
+    const taskToUpdate = tasks.find(task => task.id === taskId);
+    if (taskToUpdate) {
+      const updatedTask = { ...taskToUpdate, completed: !taskToUpdate.completed };
+      await fetch(`/api/tasks/${taskId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ task: updatedTask }),
+      });
+      setTasks(tasks.map(task =>
+        task.id === taskId ? updatedTask : task
+      ));
+    }
   };
 
   const handleEditNotes = (task: Task) => {
