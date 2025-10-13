@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Task } from '@/types';
 import TaskForm from '@/components/TaskForm';
 import TaskList from '@/components/TaskList';
@@ -17,14 +17,15 @@ export default function Home() {
   const [pendingTask, setPendingTask] = useState<Omit<Task, 'id' | 'notes'> | null>(null);
   const [editingNotesTask, setEditingNotesTask] = useState<Task | null>(null);
 
-  useEffect(() => {
-    const fetchTasks = async () => {
-      const res = await fetch(`/api/tasks?workspace=${selectedWorkspace}`);
-      const data = await res.json();
-      setTasks(Object.values(data));
-    };
-    fetchTasks();
+  const fetchTasks = useCallback(async () => {
+    const res = await fetch(`/api/tasks?workspace=${selectedWorkspace}`);
+    const data = await res.json();
+    setTasks(data && typeof data === 'object' ? Object.values(data) : []);
   }, [selectedWorkspace]);
+
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
 
   const categories: Task['category'][] = ['Content', 'Ops', 'Strategy', 'Paid', 'Other'];
 
@@ -35,25 +36,23 @@ export default function Home() {
       setPendingTask({ ...taskData, workspace: selectedWorkspace });
       setShowTop5LimitModal(true);
     } else {
-      const res = await fetch('/api/tasks', {
+      await fetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ task: { ...taskData, workspace: selectedWorkspace, notes: '', completed: false } }),
       });
-      const { id } = await res.json();
-      setTasks([...tasks, { ...taskData, workspace: selectedWorkspace, id, notes: '', completed: false }]);
+      await fetchTasks();
     }
   };
 
   const handleMoveToUrgent = async () => {
     if (pendingTask) {
-      const res = await fetch('/api/tasks', {
+      await fetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ task: { ...pendingTask, priority: 'Urgent', notes: '', completed: false } }),
       });
-      const { id } = await res.json();
-      setTasks([...tasks, { ...pendingTask, priority: 'Urgent', id, notes: '', completed: false }]);
+      await fetchTasks();
       setShowTop5LimitModal(false);
       setPendingTask(null);
     }
@@ -72,18 +71,13 @@ export default function Home() {
         );
       }
 
-      const res = await fetch('/api/tasks', {
+      await fetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ task: { ...pendingTask, notes: '', completed: false } }),
       });
-      const { id } = await res.json();
 
-      const updatedTasks = tasks.map(t =>
-        t.id === taskIdToReplace ? { ...t, priority: 'Urgent' as const } : t
-      );
-      const newTask: Task = { ...pendingTask, id, notes: '', completed: false };
-      setTasks([...updatedTasks, newTask]);
+      await fetchTasks();
       setShowTop5LimitModal(false);
       setPendingTask(null);
     }
