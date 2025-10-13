@@ -27,7 +27,7 @@ const NotesModal: React.FC<NotesModalProps> = ({ task, onClose, onSave }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
       <div className="bg-gray-900 p-6 rounded-lg shadow-xl w-full max-w-lg mx-4">
-        <h2 className="text-2xl font-bold text-white mb-4">Edit Notes for "{task.text}"</h2>
+        <h2 className="text-2xl font-bold text-white mb-4">Edit Notes for &quot;{task.text}&quot;</h2>
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}

@@ -15,7 +15,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ onAddTask }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onAddTask({ text, priority, dropDead: dropDead?.toISOString() || '', category, notes: '' });
+    onAddTask({ text, priority, dropDead: dropDead?.toISOString() || '', category, completed: false });
     setText('');
     setPriority('Hopper');
     setDropDead(null);
@@ -38,7 +38,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ onAddTask }) => {
         </div>
         <div>
           <label htmlFor="task-priority" className="block text-sm font-medium text-gray-300 mb-1">Priority</label>
-          <select id="task-priority" value={priority} onChange={(e) => setPriority(e.target.value as any)} className="w-full p-2 bg-gray-800 text-white rounded">
+          <select id="task-priority" value={priority} onChange={(e) => setPriority(e.target.value as Task['priority'])} className="w-full p-2 bg-gray-800 text-white rounded">
             <option value="Hopper">Hopper</option>
             <option value="Urgent">Urgent</option>
             <option value="Top 5">Top 5</option>
@@ -56,7 +56,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ onAddTask }) => {
         </div>
         <div>
           <label htmlFor="task-category" className="block text-sm font-medium text-gray-300 mb-1">Category</label>
-          <select id="task-category" value={category} onChange={(e) => setCategory(e.target.value as any)} className="w-full p-2 bg-gray-800 text-white rounded">
+          <select id="task-category" value={category} onChange={(e) => setCategory(e.target.value as Task['category'])} className="w-full p-2 bg-gray-800 text-white rounded">
             <option value="Content">Content</option>
             <option value="Ops">Ops</option>
             <option value="Strategy">Strategy</option>

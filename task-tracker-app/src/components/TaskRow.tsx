@@ -15,9 +15,12 @@ interface TaskRowProps {
 const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, onToggleComplete }) => {
   const [editableTask, setEditableTask] = useState<Task>(task);
 
-  const debouncedSave = useCallback(debounce((newTask: Task) => {
-    onSave(newTask);
-  }, 500), [onSave]);
+  const debouncedSave = useCallback(
+    debounce((newTask: Task) => {
+      onSave(newTask);
+    }, 500),
+    [onSave]
+  );
 
   useEffect(() => {
     setEditableTask(task);

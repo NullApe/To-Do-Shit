@@ -18,7 +18,7 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onSaveTask, onDeleteTask, on
   const urgentTasks = activeTasks.filter(task => task.priority === 'Urgent');
   const hopperTasks = activeTasks.filter(task => task.priority === 'Hopper');
 
-  const renderTaskSection = (title: string, tasks: Task[], isCompletedSection = false) => (
+  const renderTaskSection = (title: string, tasks: Task[]) => (
     <div>
       <h2 className="text-2xl font-bold text-white mb-4 border-b-2 border-gray-700 pb-2">{title}</h2>
       <table className="w-full text-left text-white table-fixed">
@@ -53,7 +53,7 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onSaveTask, onDeleteTask, on
       {renderTaskSection('Top 5', top5Tasks)}
       {renderTaskSection('Urgent', urgentTasks)}
       {renderTaskSection('Hopper', hopperTasks)}
-      {renderTaskSection('Completed', completedTasks, true)}
+      {renderTaskSection('Completed', completedTasks)}
     </div>
   );
 };

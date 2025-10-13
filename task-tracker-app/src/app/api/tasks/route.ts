@@ -2,7 +2,7 @@
 import { kv } from '@/lib/kv';
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const tasks = await kv.hgetall('tasks');
     return NextResponse.json(tasks || {});
