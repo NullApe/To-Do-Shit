@@ -22,7 +22,7 @@ export default function Home() {
     const res = await fetch(`/api/tasks?workspace=${selectedWorkspace}`);
     const data = await res.json();
     console.log('Fetched data:', data);
-    const tasksArray = data && typeof data === 'object' ? Object.values(data) : [];
+    const tasksArray = (data && typeof data === 'object' ? Object.values(data) : []) as Task[];
     console.log('Tasks array:', tasksArray);
     setTasks(tasksArray);
   }, [selectedWorkspace]);
