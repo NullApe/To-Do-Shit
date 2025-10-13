@@ -4,7 +4,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { Task } from '@/types';
 
 interface TaskFormProps {
-  onAddTask: (task: Omit<Task, 'id' | 'notes'>) => void;
+  onAddTask: (task: Omit<Task, 'id' | 'notes' | 'workspace'>) => void;
 }
 
 const TaskForm: React.FC<TaskFormProps> = ({ onAddTask }) => {
