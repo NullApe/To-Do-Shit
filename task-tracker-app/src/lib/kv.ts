@@ -13,7 +13,10 @@ export const kv = {
   async hset(key: string, values: Record<string, unknown>) {
     const entries = Object.entries(values).flat();
     if (entries.length === 0) return;
-    await redis.hset(key, ...entries.map(v => typeof v === 'object' ? JSON.stringify(v) : v));
+    const stringified = entries.map(v =>
+      typeof v === 'object' && v !== null ? JSON.stringify(v) : String(v)
+    );
+    await redis.hset(key, ...stringified);
   },
 
   async hdel(key: string, field: string) {
