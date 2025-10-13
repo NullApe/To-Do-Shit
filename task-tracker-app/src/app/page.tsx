@@ -79,9 +79,10 @@ export default function Home() {
       const { id } = await res.json();
 
       const updatedTasks = tasks.map(t =>
-        t.id === taskIdToReplace ? { ...t, priority: 'Urgent' } : t
+        t.id === taskIdToReplace ? { ...t, priority: 'Urgent' as const } : t
       );
-      setTasks([...updatedTasks, { ...pendingTask, id, notes: '', completed: false }]);
+      const newTask: Task = { ...pendingTask, id, notes: '', completed: false };
+      setTasks([...updatedTasks, newTask]);
       setShowTop5LimitModal(false);
       setPendingTask(null);
     }
