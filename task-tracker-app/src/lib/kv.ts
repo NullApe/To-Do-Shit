@@ -10,7 +10,7 @@ export const kv = {
     return Object.keys(data).length === 0 ? null : data;
   },
 
-  async hset(key: string, values: Record<string, any>) {
+  async hset(key: string, values: Record<string, unknown>) {
     const entries = Object.entries(values).flat();
     if (entries.length === 0) return;
     await redis.hset(key, ...entries.map(v => typeof v === 'object' ? JSON.stringify(v) : v));
