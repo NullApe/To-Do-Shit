@@ -64,6 +64,7 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onSaveTask, onDeleteTask, on
         <table className="hidden md:table w-full text-left text-white table-fixed">
           <thead>
             <tr className="border-b border-gray-700">
+              <th className="p-2 w-12"></th>
               <th className="p-2 w-1/3">Task</th>
               <th className="p-2 w-1/6">Priority</th>
               <th className="p-2 w-1/6">Drop Dead</th>

@@ -119,13 +119,13 @@ export default function Home() {
 
   const handleSaveTask = async (updatedTask: Task) => {
     const originalTask = tasks.find(t => t.id === updatedTask.id);
-    const top5Tasks = tasks.filter(t => t.priority === 'Top 5' && t.id !== updatedTask.id);
+    const currentTop5Tasks = tasks.filter(t => t.priority === 'Top 5' && t.id !== updatedTask.id);
 
-    // Check if task is being moved to Top 5 and limit would be exceeded
+    // Check if task is being moved INTO Top 5 from another priority and Top 5 is currently full
     if (originalTask &&
         originalTask.priority !== 'Top 5' &&
         updatedTask.priority === 'Top 5' &&
-        top5Tasks.length >= 5) {
+        currentTop5Tasks.length >= 5) {
       // Show the Top 5 limit modal
       setPendingTask({
         text: updatedTask.text,

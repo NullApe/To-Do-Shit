@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import DatePicker from 'react-datepicker';
 import { Task } from '@/types';
-import { FaTrash, FaCheck, FaEllipsisV } from 'react-icons/fa';
+import { FaTrash, FaCheck, FaEllipsisV, FaGripVertical } from 'react-icons/fa';
 import { debounce } from 'lodash';
 
 interface TaskRowProps {
@@ -16,6 +16,7 @@ interface TaskRowProps {
 const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, onToggleComplete, onDragStart }) => {
   const [editableTask, setEditableTask] = useState<Task>(task);
   const [showDetails, setShowDetails] = useState(false);
+  const [isCompleting, setIsCompleting] = useState(false);
 
   const handleDragStart = (e: React.DragEvent) => {
     e.dataTransfer.effectAllowed = 'move';
@@ -63,14 +64,38 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, 
     return notes;
   };
 
+  const handleToggleCompleteWithAnimation = () => {
+    if (!task.completed) {
+      // Only animate when completing (not uncompleting)
+      setIsCompleting(true);
+      setTimeout(() => {
+        onToggleComplete(task.id);
+      }, 500); // Wait for animation to finish before updating state
+    } else {
+      // If uncompleting, no animation needed
+      onToggleComplete(task.id);
+    }
+  };
+
   return (
     <>
       {/* Desktop View - Table Row */}
       <tr
-        draggable={!task.completed}
-        onDragStart={handleDragStart}
-        className={`hidden md:table-row border-b border-gray-800 ${task.completed ? 'bg-gray-800 opacity-50' : 'hover:bg-gray-700 cursor-move'}`}
+        className={`hidden md:table-row border-b border-gray-800 transition-all duration-500 ${
+          task.completed ? 'bg-gray-800 opacity-50' : 'hover:bg-gray-700'
+        } ${
+          isCompleting ? 'opacity-0 translate-x-4 scale-95' : ''
+        }`}
       >
+        <td className="p-1">
+          <div
+            draggable={!task.completed}
+            onDragStart={handleDragStart}
+            className={`flex items-center justify-center cursor-grab active:cursor-grabbing ${task.completed ? 'cursor-not-allowed opacity-50' : 'text-gray-400 hover:text-gray-200'}`}
+          >
+            <FaGripVertical />
+          </div>
+        </td>
         <td className="p-1"><input name="text" value={editableTask.text} onChange={handleChange} className="bg-gray-700 p-1 rounded w-full" /></td>
         <td className="p-1">
           <select name="priority" value={editableTask.priority} onChange={handleChange} className="bg-gray-700 p-1 rounded w-full">
@@ -96,7 +121,7 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, 
         </td>
         <td className="p-1">
           <div className="flex items-center justify-center space-x-2">
-            <button onClick={() => onToggleComplete(task.id)} className="text-green-500 hover:text-green-400 cursor-pointer"><FaCheck /></button>
+            <button onClick={handleToggleCompleteWithAnimation} className="text-green-500 hover:text-green-400 cursor-pointer"><FaCheck /></button>
             <button onClick={() => onDelete(task.id)} className="text-red-500 hover:text-red-400 cursor-pointer"><FaTrash /></button>
           </div>
         </td>
@@ -104,11 +129,20 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, 
 
       {/* Mobile View - Card Layout */}
       <div
-        draggable={!task.completed}
-        onDragStart={handleDragStart}
-        className={`md:hidden mb-2 p-3 rounded-lg ${task.completed ? 'bg-gray-800 opacity-50' : 'bg-gray-800 cursor-move'}`}
+        className={`md:hidden mb-2 p-3 rounded-lg transition-all duration-500 ${
+          task.completed ? 'bg-gray-800 opacity-50' : 'bg-gray-800'
+        } ${
+          isCompleting ? 'opacity-0 translate-x-4 scale-95' : ''
+        }`}
       >
         <div className="flex items-center justify-between gap-2">
+          <div
+            draggable={!task.completed}
+            onDragStart={handleDragStart}
+            className={`cursor-grab active:cursor-grabbing ${task.completed ? 'cursor-not-allowed opacity-50' : 'text-gray-400 hover:text-gray-200'}`}
+          >
+            <FaGripVertical size={20} />
+          </div>
           <div className="flex-1">
             <input
               name="text"
@@ -118,7 +152,7 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, 
             />
           </div>
           <button
-            onClick={() => onToggleComplete(task.id)}
+            onClick={handleToggleCompleteWithAnimation}
             className="text-green-500 hover:text-green-400 p-2 cursor-pointer"
           >
             <FaCheck size={18} />
