@@ -8,6 +8,7 @@ import TaskList from '@/components/TaskList';
 import FilterControls from '@/components/FilterControls';
 import Top5LimitModal from '@/components/Top5LimitModal';
 import NotesModal from '@/components/NotesModal';
+import DeleteConfirmModal from '@/components/DeleteConfirmModal';
 
 export default function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -15,7 +16,9 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<'All' | Task['category']>('All');
   const [showTop5LimitModal, setShowTop5LimitModal] = useState(false);
   const [pendingTask, setPendingTask] = useState<Omit<Task, 'id' | 'notes'> | null>(null);
+  const [pendingTaskId, setPendingTaskId] = useState<string | null>(null);
   const [editingNotesTask, setEditingNotesTask] = useState<Task | null>(null);
+  const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
 
   const fetchTasks = useCallback(async () => {
     console.log('Fetching tasks for workspace:', selectedWorkspace);
@@ -56,14 +59,25 @@ export default function Home() {
 
   const handleMoveToUrgent = async () => {
     if (pendingTask) {
-      await fetch('/api/tasks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ task: { ...pendingTask, priority: 'Urgent', notes: '', completed: false } }),
-      });
+      if (pendingTaskId) {
+        // Updating an existing task
+        await fetch(`/api/tasks/${pendingTaskId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ task: { ...pendingTask, id: pendingTaskId, priority: 'Urgent', notes: tasks.find(t => t.id === pendingTaskId)?.notes || '' } }),
+        });
+      } else {
+        // Creating a new task
+        await fetch('/api/tasks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ task: { ...pendingTask, priority: 'Urgent', notes: '', completed: false } }),
+        });
+      }
       await fetchTasks();
       setShowTop5LimitModal(false);
       setPendingTask(null);
+      setPendingTaskId(null);
     }
   };
 
@@ -80,19 +94,53 @@ export default function Home() {
         );
       }
 
-      await fetch('/api/tasks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ task: { ...pendingTask, notes: '', completed: false } }),
-      });
+      if (pendingTaskId) {
+        // Updating an existing task - move it to Top 5
+        await fetch(`/api/tasks/${pendingTaskId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ task: { ...pendingTask, id: pendingTaskId, notes: tasks.find(t => t.id === pendingTaskId)?.notes || '' } }),
+        });
+      } else {
+        // Creating a new task
+        await fetch('/api/tasks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ task: { ...pendingTask, notes: '', completed: false } }),
+        });
+      }
 
       await fetchTasks();
       setShowTop5LimitModal(false);
       setPendingTask(null);
+      setPendingTaskId(null);
     }
   };
 
   const handleSaveTask = async (updatedTask: Task) => {
+    const originalTask = tasks.find(t => t.id === updatedTask.id);
+    const top5Tasks = tasks.filter(t => t.priority === 'Top 5' && t.id !== updatedTask.id);
+
+    // Check if task is being moved to Top 5 and limit would be exceeded
+    if (originalTask &&
+        originalTask.priority !== 'Top 5' &&
+        updatedTask.priority === 'Top 5' &&
+        top5Tasks.length >= 5) {
+      // Show the Top 5 limit modal
+      setPendingTask({
+        text: updatedTask.text,
+        priority: updatedTask.priority,
+        dropDead: updatedTask.dropDead,
+        category: updatedTask.category,
+        workspace: updatedTask.workspace,
+        completed: updatedTask.completed
+      });
+      setPendingTaskId(updatedTask.id);
+      setShowTop5LimitModal(true);
+      // Revert the task change in local state
+      return;
+    }
+
     await fetch(`/api/tasks/${updatedTask.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -102,11 +150,21 @@ export default function Home() {
     setEditingNotesTask(null);
   };
 
-  const handleDeleteTask = async (taskId: string) => {
-    await fetch(`/api/tasks/${taskId}?workspace=${selectedWorkspace}`, {
-      method: 'DELETE',
-    });
-    setTasks(tasks.filter(task => task.id !== taskId));
+  const handleDeleteTask = (taskId: string) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (task) {
+      setTaskToDelete(task);
+    }
+  };
+
+  const confirmDeleteTask = async () => {
+    if (taskToDelete) {
+      await fetch(`/api/tasks/${taskToDelete.id}?workspace=${selectedWorkspace}`, {
+        method: 'DELETE',
+      });
+      setTasks(tasks.filter(task => task.id !== taskToDelete.id));
+      setTaskToDelete(null);
+    }
   };
 
   const handleToggleComplete = async (taskId: string) => {
@@ -121,6 +179,14 @@ export default function Home() {
       setTasks(tasks.map(task =>
         task.id === taskId ? updatedTask : task
       ));
+    }
+  };
+
+  const handleMoveTask = async (taskId: string, newPriority: Task['priority']) => {
+    const taskToUpdate = tasks.find(task => task.id === taskId);
+    if (taskToUpdate && taskToUpdate.priority !== newPriority) {
+      const updatedTask = { ...taskToUpdate, priority: newPriority };
+      await handleSaveTask(updatedTask);
     }
   };
 
@@ -166,7 +232,7 @@ export default function Home() {
           <TaskForm onAddTask={handleAddTask} />
         </div>
         <div className="mt-8">
-          <TaskList tasks={filteredTasks} onSaveTask={handleSaveTask} onDeleteTask={handleDeleteTask} onEditNotes={handleEditNotes} onToggleComplete={handleToggleComplete} />
+          <TaskList tasks={filteredTasks} onSaveTask={handleSaveTask} onDeleteTask={handleDeleteTask} onEditNotes={handleEditNotes} onToggleComplete={handleToggleComplete} onMoveTask={handleMoveTask} />
         </div>
         {showTop5LimitModal && (
           <Top5LimitModal 
@@ -177,10 +243,17 @@ export default function Home() {
           />
         )}
         {editingNotesTask && (
-          <NotesModal 
+          <NotesModal
             task={editingNotesTask}
             onClose={() => setEditingNotesTask(null)}
             onSave={handleSaveTask}
+          />
+        )}
+        {taskToDelete && (
+          <DeleteConfirmModal
+            task={taskToDelete}
+            onClose={() => setTaskToDelete(null)}
+            onConfirm={confirmDeleteTask}
           />
         )}
       </div>

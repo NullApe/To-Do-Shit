@@ -10,11 +10,20 @@ interface TaskRowProps {
   onDelete: (taskId: string) => void;
   onEditNotes: (task: Task) => void;
   onToggleComplete: (taskId: string) => void;
+  onDragStart?: (taskId: string) => void;
 }
 
-const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, onToggleComplete }) => {
+const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, onToggleComplete, onDragStart }) => {
   const [editableTask, setEditableTask] = useState<Task>(task);
   const [showDetails, setShowDetails] = useState(false);
+
+  const handleDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', task.id);
+    if (onDragStart) {
+      onDragStart(task.id);
+    }
+  };
 
   const debouncedSave = useCallback(
     debounce((newTask: Task) => {
@@ -57,7 +66,11 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, 
   return (
     <>
       {/* Desktop View - Table Row */}
-      <tr className={`hidden md:table-row border-b border-gray-800 ${task.completed ? 'bg-gray-800 opacity-50' : 'hover:bg-gray-700'}`}>
+      <tr
+        draggable={!task.completed}
+        onDragStart={handleDragStart}
+        className={`hidden md:table-row border-b border-gray-800 ${task.completed ? 'bg-gray-800 opacity-50' : 'hover:bg-gray-700 cursor-move'}`}
+      >
         <td className="p-1"><input name="text" value={editableTask.text} onChange={handleChange} className="bg-gray-700 p-1 rounded w-full" /></td>
         <td className="p-1">
           <select name="priority" value={editableTask.priority} onChange={handleChange} className="bg-gray-700 p-1 rounded w-full">
@@ -83,14 +96,18 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, 
         </td>
         <td className="p-1">
           <div className="flex items-center justify-center space-x-2">
-            <button onClick={() => onToggleComplete(task.id)} className="text-green-500 hover:text-green-400"><FaCheck /></button>
-            <button onClick={() => onDelete(task.id)} className="text-red-500 hover:text-red-400"><FaTrash /></button>
+            <button onClick={() => onToggleComplete(task.id)} className="text-green-500 hover:text-green-400 cursor-pointer"><FaCheck /></button>
+            <button onClick={() => onDelete(task.id)} className="text-red-500 hover:text-red-400 cursor-pointer"><FaTrash /></button>
           </div>
         </td>
       </tr>
 
       {/* Mobile View - Card Layout */}
-      <div className={`md:hidden mb-2 p-3 rounded-lg ${task.completed ? 'bg-gray-800 opacity-50' : 'bg-gray-800'}`}>
+      <div
+        draggable={!task.completed}
+        onDragStart={handleDragStart}
+        className={`md:hidden mb-2 p-3 rounded-lg ${task.completed ? 'bg-gray-800 opacity-50' : 'bg-gray-800 cursor-move'}`}
+      >
         <div className="flex items-center justify-between gap-2">
           <div className="flex-1">
             <input
@@ -102,7 +119,7 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, 
           </div>
           <button
             onClick={() => onToggleComplete(task.id)}
-            className="text-green-500 hover:text-green-400 p-2"
+            className="text-green-500 hover:text-green-400 p-2 cursor-pointer"
           >
             <FaCheck size={18} />
           </button>
@@ -156,7 +173,7 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, 
             <div className="pt-2">
               <button
                 onClick={() => onDelete(task.id)}
-                className="text-red-500 hover:text-red-400 text-sm flex items-center gap-2"
+                className="text-red-500 hover:text-red-400 text-sm flex items-center gap-2 cursor-pointer"
               >
                 <FaTrash /> Delete Task
               </button>
