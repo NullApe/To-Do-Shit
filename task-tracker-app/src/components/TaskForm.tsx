@@ -12,14 +12,16 @@ const TaskForm: React.FC<TaskFormProps> = ({ onAddTask }) => {
   const [priority, setPriority] = useState<'Top 5' | 'Urgent' | 'Hopper'>('Hopper');
   const [dropDead, setDropDead] = useState<Date | null>(null);
   const [category, setCategory] = useState<'Content' | 'Ops' | 'Strategy' | 'Paid' | 'Other'>('Other');
+  const [isDailyReminder, setIsDailyReminder] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onAddTask({ text, priority, dropDead: dropDead?.toISOString() || '', category, completed: false });
+    onAddTask({ text, priority, dropDead: dropDead?.toISOString() || '', category, completed: false, isDailyReminder });
     setText('');
     setPriority('Hopper');
     setDropDead(null);
     setCategory('Other');
+    setIsDailyReminder(false);
   };
 
   return (
@@ -38,7 +40,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ onAddTask }) => {
         </div>
         <div>
           <label htmlFor="task-priority" className="block text-sm font-medium text-gray-300 mb-1">Priority</label>
-          <select id="task-priority" value={priority} onChange={(e) => setPriority(e.target.value as Task['priority'])} className="w-full p-2 bg-gray-800 text-white rounded">
+          <select id="task-priority" value={priority} onChange={(e) => setPriority(e.target.value as Task['priority'])} className="w-full p-2 bg-gray-800 text-white rounded" disabled={isDailyReminder}>
             <option value="Hopper">Hopper</option>
             <option value="Urgent">Urgent</option>
             <option value="Top 5">Top 5</option>
@@ -46,7 +48,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ onAddTask }) => {
         </div>
         <div>
           <label htmlFor="task-dropdead" className="block text-sm font-medium text-gray-300 mb-1">Drop Dead</label>
-          <DatePicker 
+          <DatePicker
             id="task-dropdead"
             selected={dropDead}
             onChange={(date: Date | null) => setDropDead(date)}
@@ -67,6 +69,18 @@ const TaskForm: React.FC<TaskFormProps> = ({ onAddTask }) => {
         <button type="submit" className="p-2 bg-blue-600 text-white rounded hover:bg-blue-500">
           Add Task
         </button>
+      </div>
+      <div className="mt-4 flex items-center">
+        <input
+          id="daily-reminder"
+          type="checkbox"
+          checked={isDailyReminder}
+          onChange={(e) => setIsDailyReminder(e.target.checked)}
+          className="w-4 h-4 bg-gray-800 border-gray-600 rounded focus:ring-purple-500"
+        />
+        <label htmlFor="daily-reminder" className="ml-2 text-sm text-gray-300">
+          Daily Reminder (resets at 4am PST)
+        </label>
       </div>
     </form>
   );

@@ -8,4 +8,5 @@ export interface Task {
   notes: string;
   completed: boolean;
   workspace: 'Work' | 'Projects' | 'Personal';
+  isDailyReminder?: boolean; // Daily reminders are reset at 4am PST
 }

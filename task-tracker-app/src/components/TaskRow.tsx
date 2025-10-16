@@ -89,16 +89,20 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, 
       >
         <td className="p-1">
           <div
-            draggable={!task.completed}
+            draggable={!task.completed && !task.isDailyReminder}
             onDragStart={handleDragStart}
-            className={`flex items-center justify-center cursor-grab active:cursor-grabbing ${task.completed ? 'cursor-not-allowed opacity-50' : 'text-gray-400 hover:text-gray-200'}`}
+            className={`flex items-center justify-center ${
+              task.completed || task.isDailyReminder
+                ? 'cursor-not-allowed opacity-50'
+                : 'cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-200'
+            }`}
           >
             <FaGripVertical />
           </div>
         </td>
-        <td className="p-1"><input name="text" value={editableTask.text} onChange={handleChange} className="bg-gray-700 p-1 rounded w-full" /></td>
+        <td className="p-1"><input name="text" value={editableTask.text} onChange={handleChange} className="bg-gray-700 p-1 rounded w-full" disabled={task.isDailyReminder} /></td>
         <td className="p-1">
-          <select name="priority" value={editableTask.priority} onChange={handleChange} className="bg-gray-700 p-1 rounded w-full">
+          <select name="priority" value={editableTask.priority} onChange={handleChange} className="bg-gray-700 p-1 rounded w-full" disabled={task.isDailyReminder}>
             <option value="Hopper">Hopper</option>
             <option value="Urgent">Urgent</option>
             <option value="Top 5">Top 5</option>
@@ -137,9 +141,13 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, 
       >
         <div className="flex items-center justify-between gap-2">
           <div
-            draggable={!task.completed}
+            draggable={!task.completed && !task.isDailyReminder}
             onDragStart={handleDragStart}
-            className={`cursor-grab active:cursor-grabbing ${task.completed ? 'cursor-not-allowed opacity-50' : 'text-gray-400 hover:text-gray-200'}`}
+            className={`${
+              task.completed || task.isDailyReminder
+                ? 'cursor-not-allowed opacity-50'
+                : 'cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-200'
+            }`}
           >
             <FaGripVertical size={20} />
           </div>
@@ -149,6 +157,7 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, 
               value={editableTask.text}
               onChange={handleChange}
               className={`bg-gray-700 p-2 rounded w-full text-sm ${task.completed ? 'line-through' : ''}`}
+              disabled={task.isDailyReminder}
             />
           </div>
           <button
@@ -170,7 +179,7 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, 
           <div className="mt-3 space-y-2 pt-3 border-t border-gray-700">
             <div>
               <label className="text-xs text-gray-400 block mb-1">Priority</label>
-              <select name="priority" value={editableTask.priority} onChange={handleChange} className="bg-gray-700 p-2 rounded w-full text-sm">
+              <select name="priority" value={editableTask.priority} onChange={handleChange} className="bg-gray-700 p-2 rounded w-full text-sm" disabled={task.isDailyReminder}>
                 <option value="Hopper">Hopper</option>
                 <option value="Urgent">Urgent</option>
                 <option value="Top 5">Top 5</option>

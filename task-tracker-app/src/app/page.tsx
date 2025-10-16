@@ -39,7 +39,7 @@ export default function Home() {
 
   const handleAddTask = async (taskData: Omit<Task, 'id' | 'notes' | 'workspace'>) => {
     console.log('Adding task:', taskData);
-    const top5Tasks = tasks.filter(t => t.priority === 'Top 5');
+    const top5Tasks = tasks.filter(t => t.priority === 'Top 5' && !t.completed);
     if (taskData.priority === 'Top 5' && top5Tasks.length >= 5) {
       setPendingTask({ ...taskData, workspace: selectedWorkspace });
       setShowTop5LimitModal(true);
@@ -119,7 +119,7 @@ export default function Home() {
 
   const handleSaveTask = async (updatedTask: Task) => {
     const originalTask = tasks.find(t => t.id === updatedTask.id);
-    const currentTop5Tasks = tasks.filter(t => t.priority === 'Top 5' && t.id !== updatedTask.id);
+    const currentTop5Tasks = tasks.filter(t => t.priority === 'Top 5' && t.id !== updatedTask.id && !t.completed);
 
     // Check if task is being moved INTO Top 5 from another priority and Top 5 is currently full
     if (originalTask &&
@@ -235,11 +235,11 @@ export default function Home() {
           <TaskList tasks={filteredTasks} onSaveTask={handleSaveTask} onDeleteTask={handleDeleteTask} onEditNotes={handleEditNotes} onToggleComplete={handleToggleComplete} onMoveTask={handleMoveTask} />
         </div>
         {showTop5LimitModal && (
-          <Top5LimitModal 
+          <Top5LimitModal
             onClose={() => setShowTop5LimitModal(false)}
             onMoveToUrgent={handleMoveToUrgent}
             onReplace={handleReplaceTask}
-            top5Tasks={tasks.filter(t => t.priority === 'Top 5')}
+            top5Tasks={tasks.filter(t => t.priority === 'Top 5' && !t.completed)}
           />
         )}
         {editingNotesTask && (
