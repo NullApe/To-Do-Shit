@@ -52,7 +52,6 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onSaveTask, onDeleteTask, on
     e.preventDefault();
     const taskId = e.dataTransfer.getData('text/plain');
     setDragOverSection(null);
-    setDraggedTaskId(null);
 
     if (taskId && onMoveTask) {
       onMoveTask(taskId, newPriority);
