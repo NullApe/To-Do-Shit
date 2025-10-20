@@ -3,7 +3,6 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Task } from '@/types';
-import TaskForm from '@/components/TaskForm';
 import TaskList from '@/components/TaskList';
 import FilterControls from '@/components/FilterControls';
 import Top5LimitModal from '@/components/Top5LimitModal';
@@ -223,16 +222,13 @@ export default function Home() {
           ))}
         </div>
 
-        <FilterControls 
-          categories={categories} 
-          selectedCategory={selectedCategory} 
-          setSelectedCategory={setSelectedCategory} 
+        <FilterControls
+          categories={categories}
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
         />
-        <div className="mt-6">
-          <TaskForm onAddTask={handleAddTask} />
-        </div>
         <div className="mt-8">
-          <TaskList tasks={filteredTasks} onSaveTask={handleSaveTask} onDeleteTask={handleDeleteTask} onEditNotes={handleEditNotes} onToggleComplete={handleToggleComplete} onMoveTask={handleMoveTask} />
+          <TaskList tasks={filteredTasks} onSaveTask={handleSaveTask} onDeleteTask={handleDeleteTask} onEditNotes={handleEditNotes} onToggleComplete={handleToggleComplete} onMoveTask={handleMoveTask} onAddTask={handleAddTask} />
         </div>
         {showTop5LimitModal && (
           <Top5LimitModal

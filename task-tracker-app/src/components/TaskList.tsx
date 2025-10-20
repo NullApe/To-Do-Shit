@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Task } from '@/types';
 import TaskRow from './TaskRow';
+import { FaPlus } from 'react-icons/fa';
 
 interface TaskListProps {
   tasks: Task[];
@@ -9,22 +10,30 @@ interface TaskListProps {
   onEditNotes: (task: Task) => void;
   onToggleComplete: (taskId: string) => void;
   onMoveTask?: (taskId: string, newPriority: Task['priority']) => void;
+  onAddTask: (task: Omit<Task, 'id' | 'notes' | 'workspace'>) => void;
 }
 
-const TaskList: React.FC<TaskListProps> = ({ tasks, onSaveTask, onDeleteTask, onEditNotes, onToggleComplete, onMoveTask }) => {
+const TaskList: React.FC<TaskListProps> = ({ tasks, onSaveTask, onDeleteTask, onEditNotes, onToggleComplete, onMoveTask, onAddTask }) => {
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [dragOverSection, setDragOverSection] = useState<string | null>(null);
 
   const activeTasks = tasks.filter(task => !task.completed);
   const completedTasks = tasks.filter(task => task.completed);
 
-  // Separate daily reminders from regular tasks
-  const dailyReminderTasks = tasks.filter(task => task.isDailyReminder);
-  const regularTasks = activeTasks.filter(task => !task.isDailyReminder);
+  const dailyReminderTasks = activeTasks.filter(task => task.priority === 'Daily Reminders');
+  const top5Tasks = activeTasks.filter(task => task.priority === 'Top 5');
+  const urgentTasks = activeTasks.filter(task => task.priority === 'Urgent');
+  const hopperTasks = activeTasks.filter(task => task.priority === 'Hopper');
 
-  const top5Tasks = regularTasks.filter(task => task.priority === 'Top 5');
-  const urgentTasks = regularTasks.filter(task => task.priority === 'Urgent');
-  const hopperTasks = regularTasks.filter(task => task.priority === 'Hopper');
+  const handleAddTaskToSection = (priority: Task['priority']) => {
+    onAddTask({
+      text: '',
+      priority,
+      dropDead: '',
+      category: 'Other',
+      completed: false,
+    });
+  };
 
   const handleDragStart = (taskId: string) => {
     setDraggedTaskId(taskId);
@@ -52,9 +61,26 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onSaveTask, onDeleteTask, on
   };
 
   const renderDailyRemindersSection = (title: string, sectionTasks: Task[]) => {
+    const isDropTarget = dragOverSection === 'Daily Reminders';
+    const dropZoneClass = isDropTarget ? 'ring-2 ring-purple-500 bg-purple-900/40' : '';
+
     return (
-      <div className="rounded-lg p-2 bg-gradient-to-r from-purple-900/30 to-blue-900/30 border-2 border-purple-500/50">
-        <h2 className="text-2xl font-bold text-white mb-4 border-b-2 border-purple-500 pb-2">{title}</h2>
+      <div
+        onDragOver={(e) => handleDragOver(e, 'Daily Reminders')}
+        onDragLeave={handleDragLeave}
+        onDrop={(e) => handleDrop(e, 'Daily Reminders')}
+        className={`rounded-lg p-2 bg-gradient-to-r from-purple-900/30 to-blue-900/30 border-2 border-purple-500/50 transition-all ${dropZoneClass}`}
+      >
+        <div className="flex items-center justify-between mb-4 border-b-2 border-purple-500 pb-2">
+          <h2 className="text-2xl font-bold text-white">{title}</h2>
+          <button
+            onClick={() => handleAddTaskToSection('Daily Reminders')}
+            className="flex items-center gap-2 px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-500 transition-colors"
+          >
+            <FaPlus size={14} />
+            <span className="text-sm">Add Task</span>
+          </button>
+        </div>
 
         {/* Desktop Table View */}
         <table className="hidden md:table w-full text-left text-white table-fixed">
@@ -113,7 +139,16 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onSaveTask, onDeleteTask, on
         onDrop={(e) => handleDrop(e, priority)}
         className={`transition-all ${dropZoneClass} rounded-lg p-2`}
       >
-        <h2 className="text-2xl font-bold text-white mb-4 border-b-2 border-gray-700 pb-2">{title}</h2>
+        <div className="flex items-center justify-between mb-4 border-b-2 border-gray-700 pb-2">
+          <h2 className="text-2xl font-bold text-white">{title}</h2>
+          <button
+            onClick={() => handleAddTaskToSection(priority)}
+            className="flex items-center gap-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-500 transition-colors"
+          >
+            <FaPlus size={14} />
+            <span className="text-sm">Add Task</span>
+          </button>
+        </div>
 
         {/* Desktop Table View */}
         <table className="hidden md:table w-full text-left text-white table-fixed">
@@ -163,7 +198,7 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onSaveTask, onDeleteTask, on
 
   return (
     <div className="space-y-8">
-      {dailyReminderTasks.length > 0 && renderDailyRemindersSection('Daily Reminders', dailyReminderTasks)}
+      {renderDailyRemindersSection('Daily Reminders', dailyReminderTasks)}
       {renderTaskSection('Top 5', top5Tasks, 'Top 5')}
       {renderTaskSection('Urgent', urgentTasks, 'Urgent')}
       {renderTaskSection('Hopper', hopperTasks, 'Hopper')}
