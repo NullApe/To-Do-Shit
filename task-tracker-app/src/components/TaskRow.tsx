@@ -26,12 +26,13 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, 
     }
   };
 
-  const debouncedSave = useCallback(
-    debounce((newTask: Task) => {
+  const debouncedSaveRef = useCallback(() => {
+    return debounce((newTask: Task) => {
       onSave(newTask);
-    }, 500),
-    [onSave]
-  );
+    }, 500);
+  }, [onSave]);
+
+  const debouncedSave = debouncedSaveRef();
 
   useEffect(() => {
     setEditableTask(task);
@@ -44,7 +45,7 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, 
     return () => {
       debouncedSave.cancel();
     };
-  }, [editableTask, debouncedSave, task]);
+  }, [editableTask, task]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;

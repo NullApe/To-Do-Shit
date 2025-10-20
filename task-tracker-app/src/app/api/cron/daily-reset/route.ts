@@ -6,10 +6,9 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(req: NextRequest) {
   try {
     // Verify the request is from a cron job (optional: add authorization header check)
-    const authHeader = req.headers.get('authorization');
-    const cronSecret = process.env.CRON_SECRET;
-
-    // Optional: Enable this check if you set up CRON_SECRET in environment variables
+    // Uncomment the following lines if you want to add security
+    // const authHeader = req.headers.get('authorization');
+    // const cronSecret = process.env.CRON_SECRET;
     // if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
     //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     // }

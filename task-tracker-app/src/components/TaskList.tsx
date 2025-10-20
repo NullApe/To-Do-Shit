@@ -14,7 +14,6 @@ interface TaskListProps {
 }
 
 const TaskList: React.FC<TaskListProps> = ({ tasks, onSaveTask, onDeleteTask, onEditNotes, onToggleComplete, onMoveTask, onAddTask }) => {
-  const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [dragOverSection, setDragOverSection] = useState<string | null>(null);
 
   const activeTasks = tasks.filter(task => !task.completed);
@@ -35,8 +34,8 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onSaveTask, onDeleteTask, on
     });
   };
 
-  const handleDragStart = (taskId: string) => {
-    setDraggedTaskId(taskId);
+  const handleDragStart = () => {
+    // Task ID is stored in dataTransfer in TaskRow component
   };
 
   const handleDragOver = (e: React.DragEvent, priority: string) => {
