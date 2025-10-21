@@ -1,10 +1,9 @@
 
 'use client';
 
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Task } from '@/types';
 import TaskList from '@/components/TaskList';
-import FilterControls from '@/components/FilterControls';
 import Top5LimitModal from '@/components/Top5LimitModal';
 import NotesModal from '@/components/NotesModal';
 import DeleteConfirmModal from '@/components/DeleteConfirmModal';
@@ -12,7 +11,6 @@ import DeleteConfirmModal from '@/components/DeleteConfirmModal';
 export default function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedWorkspace, setSelectedWorkspace] = useState<'Work' | 'Projects' | 'Personal'>('Work');
-  const [selectedCategory, setSelectedCategory] = useState<'All' | Task['category']>('All');
   const [showTop5LimitModal, setShowTop5LimitModal] = useState(false);
   const [pendingTask, setPendingTask] = useState<Omit<Task, 'id' | 'notes'> | null>(null);
   const [pendingTaskId, setPendingTaskId] = useState<string | null>(null);
@@ -32,9 +30,6 @@ export default function Home() {
   useEffect(() => {
     fetchTasks();
   }, [fetchTasks]);
-
-  const categories: Task['category'][] = ['Content', 'Ops', 'Strategy', 'Paid', 'Other'];
-
 
   const handleAddTask = async (taskData: Omit<Task, 'id' | 'notes' | 'workspace'>) => {
     console.log('Adding task:', taskData);
@@ -193,13 +188,6 @@ export default function Home() {
     setEditingNotesTask(task);
   };
 
-  const filteredTasks = useMemo(() => {
-    if (selectedCategory === 'All') {
-      return tasks;
-    }
-    return tasks.filter(task => task.category === selectedCategory);
-  }, [tasks, selectedCategory]);
-
   return (
     <main className="bg-gray-900 text-white min-h-screen p-4 sm:p-8">
       <div className="max-w-7xl mx-auto">
@@ -222,13 +210,8 @@ export default function Home() {
           ))}
         </div>
 
-        <FilterControls
-          categories={categories}
-          selectedCategory={selectedCategory}
-          setSelectedCategory={setSelectedCategory}
-        />
         <div className="mt-8">
-          <TaskList tasks={filteredTasks} onSaveTask={handleSaveTask} onDeleteTask={handleDeleteTask} onEditNotes={handleEditNotes} onToggleComplete={handleToggleComplete} onMoveTask={handleMoveTask} onAddTask={handleAddTask} />
+          <TaskList tasks={tasks} onSaveTask={handleSaveTask} onDeleteTask={handleDeleteTask} onEditNotes={handleEditNotes} onToggleComplete={handleToggleComplete} onMoveTask={handleMoveTask} onAddTask={handleAddTask} />
         </div>
         {showTop5LimitModal && (
           <Top5LimitModal

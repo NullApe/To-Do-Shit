@@ -19,7 +19,7 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onSaveTask, onDeleteTask, on
   const activeTasks = tasks.filter(task => !task.completed);
   const completedTasks = tasks.filter(task => task.completed);
 
-  const dailyReminderTasks = activeTasks.filter(task => task.priority === 'Daily Reminders');
+  const dailyReminderTasks = activeTasks.filter(task => task.priority === 'Daily');
   const top5Tasks = activeTasks.filter(task => task.priority === 'Top 5');
   const urgentTasks = activeTasks.filter(task => task.priority === 'Urgent');
   const hopperTasks = activeTasks.filter(task => task.priority === 'Hopper');
@@ -59,20 +59,20 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onSaveTask, onDeleteTask, on
   };
 
   const renderDailyRemindersSection = (title: string, sectionTasks: Task[]) => {
-    const isDropTarget = dragOverSection === 'Daily Reminders';
+    const isDropTarget = dragOverSection === 'Daily';
     const dropZoneClass = isDropTarget ? 'ring-2 ring-purple-500 bg-purple-900/40' : '';
 
     return (
       <div
-        onDragOver={(e) => handleDragOver(e, 'Daily Reminders')}
+        onDragOver={(e) => handleDragOver(e, 'Daily')}
         onDragLeave={handleDragLeave}
-        onDrop={(e) => handleDrop(e, 'Daily Reminders')}
+        onDrop={(e) => handleDrop(e, 'Daily')}
         className={`rounded-lg p-2 bg-gradient-to-r from-purple-900/30 to-blue-900/30 border-2 border-purple-500/50 transition-all ${dropZoneClass}`}
       >
         <div className="flex items-center justify-between mb-4 border-b-2 border-purple-500 pb-2">
           <h2 className="text-2xl font-bold text-white">{title}</h2>
           <button
-            onClick={() => handleAddTaskToSection('Daily Reminders')}
+            onClick={() => handleAddTaskToSection('Daily')}
             className="flex items-center gap-2 px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-500 transition-colors"
           >
             <FaPlus size={14} />
@@ -85,10 +85,9 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onSaveTask, onDeleteTask, on
           <thead>
             <tr className="border-b border-gray-700">
               <th className="p-2 w-12"></th>
-              <th className="p-2 w-1/3">Task</th>
+              <th className="p-2 w-1/2">Task</th>
               <th className="p-2 w-1/6">Priority</th>
               <th className="p-2 w-1/6">Drop Dead</th>
-              <th className="p-2 w-1/6">Category</th>
               <th className="p-2 w-1/6">Notes</th>
               <th className="p-2 w-auto"></th>
             </tr>
@@ -153,10 +152,9 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onSaveTask, onDeleteTask, on
           <thead>
             <tr className="border-b border-gray-700">
               <th className="p-2 w-12"></th>
-              <th className="p-2 w-1/3">Task</th>
+              <th className="p-2 w-1/2">Task</th>
               <th className="p-2 w-1/6">Priority</th>
               <th className="p-2 w-1/6">Drop Dead</th>
-              <th className="p-2 w-1/6">Category</th>
               <th className="p-2 w-1/6">Notes</th>
               <th className="p-2 w-auto"></th>
             </tr>
@@ -196,7 +194,7 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onSaveTask, onDeleteTask, on
 
   return (
     <div className="space-y-8">
-      {renderDailyRemindersSection('Daily Reminders', dailyReminderTasks)}
+      {renderDailyRemindersSection('Daily', dailyReminderTasks)}
       {renderTaskSection('Top 5', top5Tasks, 'Top 5')}
       {renderTaskSection('Urgent', urgentTasks, 'Urgent')}
       {renderTaskSection('Hopper', hopperTasks, 'Hopper')}

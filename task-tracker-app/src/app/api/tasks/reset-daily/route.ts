@@ -13,9 +13,9 @@ export async function POST() {
       if (tasks) {
         const updates: Record<string, Task> = {};
 
-        // Reset all completed daily reminders (priority = 'Daily Reminders')
+        // Reset all completed daily reminders (priority = 'Daily')
         Object.entries(tasks).forEach(([id, task]) => {
-          if (task.priority === 'Daily Reminders' && task.completed) {
+          if (task.priority === 'Daily' && task.completed) {
             updates[id] = { ...task, completed: false };
           }
         });

@@ -104,7 +104,7 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, 
         <td className="p-1"><input name="text" value={editableTask.text} onChange={handleChange} className="bg-gray-700 p-1 rounded w-full" /></td>
         <td className="p-1">
           <select name="priority" value={editableTask.priority} onChange={handleChange} className="bg-gray-700 p-1 rounded w-full">
-            <option value="Daily Reminders">Daily Reminders</option>
+            <option value="Daily">Daily</option>
             <option value="Top 5">Top 5</option>
             <option value="Urgent">Urgent</option>
             <option value="Hopper">Hopper</option>
@@ -112,15 +112,6 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, 
         </td>
         <td className="p-1">
           <DatePicker selected={editableTask.dropDead ? new Date(editableTask.dropDead) : null} onChange={handleDateChange} className="bg-gray-700 p-1 rounded w-full" />
-        </td>
-        <td className="p-1">
-          <select name="category" value={editableTask.category} onChange={handleChange} className="bg-gray-700 p-1 rounded w-full">
-            <option value="Content">Content</option>
-            <option value="Ops">Ops</option>
-            <option value="Strategy">Strategy</option>
-            <option value="Paid">Paid</option>
-            <option value="Other">Other</option>
-          </select>
         </td>
         <td onClick={() => onEditNotes(task)} className="p-1 cursor-pointer hover:bg-gray-600">
           {truncateNotes(editableTask.notes)}
@@ -195,7 +186,7 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, 
             <div>
               <label className="text-xs text-gray-400 block mb-1">Priority</label>
               <select name="priority" value={editableTask.priority} onChange={handleChange} className="bg-gray-700 p-2 rounded w-full text-sm">
-                <option value="Daily Reminders">Daily Reminders</option>
+                <option value="Daily">Daily</option>
                 <option value="Top 5">Top 5</option>
                 <option value="Urgent">Urgent</option>
                 <option value="Hopper">Hopper</option>
@@ -209,16 +200,6 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, 
                 className="bg-gray-700 p-2 rounded w-full text-sm"
                 wrapperClassName="w-full"
               />
-            </div>
-            <div>
-              <label className="text-xs text-gray-400 block mb-1">Category</label>
-              <select name="category" value={editableTask.category} onChange={handleChange} className="bg-gray-700 p-2 rounded w-full text-sm">
-                <option value="Content">Content</option>
-                <option value="Ops">Ops</option>
-                <option value="Strategy">Strategy</option>
-                <option value="Paid">Paid</option>
-                <option value="Other">Other</option>
-              </select>
             </div>
             <div>
               <label className="text-xs text-gray-400 block mb-1">Notes</label>
