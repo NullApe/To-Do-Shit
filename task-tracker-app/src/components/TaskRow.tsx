@@ -126,9 +126,21 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, 
           {truncateNotes(editableTask.notes)}
         </td>
         <td className="p-1">
-          <div className="flex items-center justify-center space-x-2">
-            <button onClick={handleToggleCompleteWithAnimation} className="text-green-500 hover:text-green-400 cursor-pointer"><FaCheck /></button>
-            <button onClick={() => onDelete(task.id)} className="text-red-500 hover:text-red-400 cursor-pointer"><FaTrash /></button>
+          <div className="flex items-center justify-center gap-1">
+            <button
+              onClick={handleToggleCompleteWithAnimation}
+              className="p-2 rounded hover:bg-green-600/20 text-green-500 hover:text-green-400 transition-colors"
+              title="Complete task"
+            >
+              <FaCheck size={16} />
+            </button>
+            <button
+              onClick={() => onDelete(task.id)}
+              className="p-2 rounded hover:bg-red-600/20 text-red-500 hover:text-red-400 transition-colors"
+              title="Delete task"
+            >
+              <FaTrash size={14} />
+            </button>
           </div>
         </td>
       </tr>
@@ -163,13 +175,15 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, 
           </div>
           <button
             onClick={handleToggleCompleteWithAnimation}
-            className="text-green-500 hover:text-green-400 p-2 cursor-pointer"
+            className="p-2 rounded hover:bg-green-600/20 text-green-500 hover:text-green-400 transition-colors"
+            title="Complete task"
           >
             <FaCheck size={18} />
           </button>
           <button
             onClick={() => setShowDetails(!showDetails)}
-            className="text-gray-400 hover:text-white p-2"
+            className="p-2 rounded hover:bg-gray-700 text-gray-400 hover:text-white transition-colors"
+            title="Show details"
           >
             <FaEllipsisV size={18} />
           </button>
@@ -218,9 +232,9 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, 
             <div className="pt-2">
               <button
                 onClick={() => onDelete(task.id)}
-                className="text-red-500 hover:text-red-400 text-sm flex items-center gap-2 cursor-pointer"
+                className="w-full p-2 rounded bg-red-600/10 hover:bg-red-600/20 text-red-500 hover:text-red-400 text-sm flex items-center justify-center gap-2 transition-colors"
               >
-                <FaTrash /> Delete Task
+                <FaTrash size={14} /> Delete Task
               </button>
             </div>
           </div>
