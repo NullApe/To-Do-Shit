@@ -2,7 +2,7 @@
 export interface Task {
   id: string;
   text: string;
-  priority: 'Daily' | 'Top 5' | 'Urgent' | 'Hopper';
+  priority: 'Daily' | 'Quick & Dirty' | 'Top 5' | 'Urgent' | 'Hopper';
   dropDead: string; // ISO date format
   category: 'Content' | 'Ops' | 'Strategy' | 'Paid' | 'Other';
   notes: string;

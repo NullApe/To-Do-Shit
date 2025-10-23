@@ -105,6 +105,7 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, 
         <td className="p-1">
           <select name="priority" value={editableTask.priority} onChange={handleChange} className="bg-gray-700 p-1 rounded w-full">
             <option value="Daily">Daily</option>
+            <option value="Quick & Dirty">Quick & Dirty</option>
             <option value="Top 5">Top 5</option>
             <option value="Urgent">Urgent</option>
             <option value="Hopper">Hopper</option>
@@ -187,6 +188,7 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, 
               <label className="text-xs text-gray-400 block mb-1">Priority</label>
               <select name="priority" value={editableTask.priority} onChange={handleChange} className="bg-gray-700 p-2 rounded w-full text-sm">
                 <option value="Daily">Daily</option>
+                <option value="Quick & Dirty">Quick & Dirty</option>
                 <option value="Top 5">Top 5</option>
                 <option value="Urgent">Urgent</option>
                 <option value="Hopper">Hopper</option>

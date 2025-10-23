@@ -20,6 +20,7 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onSaveTask, onDeleteTask, on
   const completedTasks = tasks.filter(task => task.completed);
 
   const dailyReminderTasks = activeTasks.filter(task => task.priority === 'Daily');
+  const quickAndDirtyTasks = activeTasks.filter(task => task.priority === 'Quick & Dirty');
   const top5Tasks = activeTasks.filter(task => task.priority === 'Top 5');
   const urgentTasks = activeTasks.filter(task => task.priority === 'Urgent');
   const hopperTasks = activeTasks.filter(task => task.priority === 'Hopper');
@@ -195,6 +196,7 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onSaveTask, onDeleteTask, on
   return (
     <div className="space-y-8">
       {renderDailyRemindersSection('Daily', dailyReminderTasks)}
+      {renderTaskSection('Quick & Dirty', quickAndDirtyTasks, 'Quick & Dirty')}
       {renderTaskSection('Top 5', top5Tasks, 'Top 5')}
       {renderTaskSection('Urgent', urgentTasks, 'Urgent')}
       {renderTaskSection('Hopper', hopperTasks, 'Hopper')}
