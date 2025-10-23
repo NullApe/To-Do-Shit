@@ -16,10 +16,13 @@ interface TaskListProps {
 const TaskList: React.FC<TaskListProps> = ({ tasks, onSaveTask, onDeleteTask, onEditNotes, onToggleComplete, onMoveTask, onAddTask }) => {
   const [dragOverSection, setDragOverSection] = useState<string | null>(null);
 
-  const activeTasks = tasks.filter(task => !task.completed);
-  const completedTasks = tasks.filter(task => task.completed);
+  // Daily tasks should only show incomplete ones (completed Daily tasks are hidden until reset)
+  const dailyReminderTasks = tasks.filter(task => task.priority === 'Daily' && !task.completed);
 
-  const dailyReminderTasks = activeTasks.filter(task => task.priority === 'Daily');
+  // All other tasks - separate active from completed
+  const activeTasks = tasks.filter(task => !task.completed && task.priority !== 'Daily');
+  const completedTasks = tasks.filter(task => task.completed && task.priority !== 'Daily');
+
   const quickAndDirtyTasks = activeTasks.filter(task => task.priority === 'Quick & Dirty');
   const top5Tasks = activeTasks.filter(task => task.priority === 'Top 5');
   const urgentTasks = activeTasks.filter(task => task.priority === 'Urgent');
