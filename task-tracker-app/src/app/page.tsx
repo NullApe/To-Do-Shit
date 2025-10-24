@@ -135,13 +135,19 @@ export default function Home() {
       return;
     }
 
-    await fetch(`/api/tasks/${updatedTask.id}`, {
+    // Optimistic update - update UI immediately before API call
+    setTasks(tasks.map(task => (task.id === updatedTask.id ? updatedTask : task)));
+    setEditingNotesTask(null);
+
+    // Save to backend asynchronously (fire and forget for better UX)
+    fetch(`/api/tasks/${updatedTask.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ task: updatedTask }),
+    }).catch(error => {
+      console.error('Failed to save task:', error);
+      // Optionally: revert the optimistic update or show an error message
     });
-    setTasks(tasks.map(task => (task.id === updatedTask.id ? updatedTask : task)));
-    setEditingNotesTask(null);
   };
 
   const handleDeleteTask = (taskId: string) => {

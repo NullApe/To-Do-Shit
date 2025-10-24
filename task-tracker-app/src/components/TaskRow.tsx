@@ -26,26 +26,37 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, 
     }
   };
 
-  const debouncedSaveRef = useCallback(() => {
-    return debounce((newTask: Task) => {
+  // Create a stable debounced save function using useMemo to persist across renders
+  const debouncedSave = React.useMemo(
+    () => debounce((newTask: Task) => {
       onSave(newTask);
-    }, 500);
-  }, [onSave]);
+    }, 1000), // Increased to 1 second for better performance on free tier
+    [onSave]
+  );
 
-  const debouncedSave = debouncedSaveRef();
-
+  // Initialize editableTask when task prop changes (new task loaded)
   useEffect(() => {
-    setEditableTask(task);
-  }, [task]);
+    if (task.id !== editableTask.id) {
+      setEditableTask(task);
+    }
+  }, [task.id]);
 
+  // Debounce save when editableTask changes
   useEffect(() => {
-    if (editableTask !== task) {
+    // Only trigger save if the task has actually changed from the original
+    if (editableTask.id && (
+      editableTask.text !== task.text ||
+      editableTask.priority !== task.priority ||
+      editableTask.dropDead !== task.dropDead ||
+      editableTask.category !== task.category
+    )) {
       debouncedSave(editableTask);
     }
+
     return () => {
       debouncedSave.cancel();
     };
-  }, [editableTask, task]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [editableTask, debouncedSave]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -101,7 +112,7 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, 
             <FaGripVertical />
           </div>
         </td>
-        <td className="p-1"><input name="text" value={editableTask.text} onChange={handleChange} className="bg-gray-700 p-1 rounded w-full" /></td>
+        <td className="p-1"><input name="text" value={editableTask.text} onChange={handleChange} className="bg-gray-700 p-1 rounded w-full task-text-input" /></td>
         <td className="p-1">
           <select name="priority" value={editableTask.priority} onChange={handleChange} className="bg-gray-700 p-1 rounded w-full">
             <option value="Daily">Daily</option>
@@ -162,7 +173,7 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onSave, onDelete, onEditNotes, 
               name="text"
               value={editableTask.text}
               onChange={handleChange}
-              className={`bg-gray-700 p-2 rounded w-full text-sm ${task.completed ? 'line-through' : ''}`}
+              className={`bg-gray-700 p-2 rounded w-full text-sm task-text-input ${task.completed ? 'line-through' : ''}`}
             />
           </div>
           <button
